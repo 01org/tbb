@@ -322,13 +322,16 @@ namespace internal {
             , my_value(other.identity_element)
         { }
         void operator()(Range& range) {
-            my_value = my_real_body(range, const_cast<const Value&>(my_value));
+            my_value = my_real_body(range, std::move(my_value));
         }
-        void join( lambda_reduce_body& rhs ) {
-            my_value = my_reduction(const_cast<const Value&>(my_value), const_cast<const Value&>(rhs.my_value));
+        void join( lambda_reduce_body& rhs ) { // It might be clearer if this took an rvalue reference.
+            my_value = my_reduction(std::move(my_value), std::move(rhs.my_value));
         }
-        Value result() const {
-            return my_value;
+        Value result() const& {
+            return my_value; // Can this return by const reference or are there race-condition issues?
+        }
+        Value result() && {
+	  return std::move(my_value);
         }
     };
 
@@ -438,7 +441,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const __TBB_DEFAULT_PARTITIONER>
                           ::run(range, body, __TBB_DEFAULT_PARTITIONER() );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction and simple_partitioner.
@@ -449,7 +452,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const simple_partitioner>
                           ::run(range, body, partitioner );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction and auto_partitioner
@@ -460,7 +463,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const auto_partitioner>
                           ::run( range, body, partitioner );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction and static_partitioner
@@ -471,7 +474,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const static_partitioner>
                                         ::run( range, body, partitioner );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction and affinity_partitioner
@@ -482,7 +485,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,affinity_partitioner>
                                         ::run( range, body, partitioner );
-    return body.result();
+    return std::move(body).result();
 }
 
 #if __TBB_TASK_GROUP_CONTEXT
@@ -494,7 +497,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const __TBB_DEFAULT_PARTITIONER>
                           ::run( range, body, __TBB_DEFAULT_PARTITIONER(), context );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction, simple partitioner and user-supplied context.
@@ -505,7 +508,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const simple_partitioner>
                           ::run( range, body, partitioner, context );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction, auto_partitioner and user-supplied context
@@ -516,7 +519,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const auto_partitioner>
                           ::run( range, body, partitioner, context );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction, static_partitioner and user-supplied context
@@ -527,7 +530,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,const static_partitioner>
                                         ::run( range, body, partitioner, context );
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with reduction, affinity_partitioner and user-supplied context
@@ -538,7 +541,7 @@ Value parallel_reduce( const Range& range, const Value& identity, const RealBody
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>,affinity_partitioner>
                                         ::run( range, body, partitioner, context );
-    return body.result();
+    return std::move(body).result();
 }
 #endif /* __TBB_TASK_GROUP_CONTEXT */
 
@@ -604,7 +607,7 @@ Value parallel_deterministic_reduce( const Range& range, const Value& identity, 
     internal::lambda_reduce_body<Range,Value,RealBody,Reduction> body(identity, real_body, reduction);
     internal::start_deterministic_reduce<Range,internal::lambda_reduce_body<Range,Value,RealBody,Reduction>, const simple_partitioner>
                           ::run(range, body, partitioner);
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with deterministic reduction and static partitioner.
@@ -614,7 +617,7 @@ Value parallel_deterministic_reduce( const Range& range, const Value& identity, 
     internal::lambda_reduce_body<Range, Value, RealBody, Reduction> body(identity, real_body, reduction);
     internal::start_deterministic_reduce<Range, internal::lambda_reduce_body<Range, Value, RealBody, Reduction>, const static_partitioner>
         ::run(range, body, partitioner);
-    return body.result();
+    return std::move(body).result();
 }
 #if __TBB_TASK_GROUP_CONTEXT
 //! Parallel iteration with deterministic reduction, default simple partitioner and user-supplied context.
@@ -633,7 +636,7 @@ Value parallel_deterministic_reduce( const Range& range, const Value& identity, 
     internal::lambda_reduce_body<Range, Value, RealBody, Reduction> body(identity, real_body, reduction);
     internal::start_deterministic_reduce<Range, internal::lambda_reduce_body<Range, Value, RealBody, Reduction>, const simple_partitioner>
         ::run(range, body, partitioner, context);
-    return body.result();
+    return std::move(body).result();
 }
 
 //! Parallel iteration with deterministic reduction, static partitioner and user-supplied context.
@@ -644,7 +647,7 @@ Value parallel_deterministic_reduce( const Range& range, const Value& identity, 
     internal::lambda_reduce_body<Range, Value, RealBody, Reduction> body(identity, real_body, reduction);
     internal::start_deterministic_reduce<Range, internal::lambda_reduce_body<Range, Value, RealBody, Reduction>, const static_partitioner>
         ::run(range, body, partitioner, context);
-    return body.result();
+    return std::move(body).result();
 }
 #endif /* __TBB_TASK_GROUP_CONTEXT */
 //@}
