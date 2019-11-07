@@ -461,11 +461,11 @@ public:
     __TBB_DEPRECATED typedef typename internal::async_helpers<T>::filtered_type filtered_type;
 
     //! Put an item to the receiver
-    bool try_put( const typename internal::async_helpers<T>::filtered_type& t ) {
+    virtual bool try_put( const typename internal::async_helpers<T>::filtered_type& t ) {
         return internal::untyped_receiver::try_put(t);
     }
 
-    bool try_put( const typename internal::async_helpers<T>::async_type& t ) {
+    virtual bool try_put( const typename internal::async_helpers<T>::async_type& t ) {
         return internal::untyped_receiver::try_put(t);
     }
 
@@ -539,7 +539,7 @@ public:
     virtual ~receiver() {}
 
     //! Put an item to the receiver
-    bool try_put( const T& t ) {
+    virtual bool try_put( const T& t ) {
         task *res = try_put_task(t);
         if (!res) return false;
         if (res != SUCCESSFULLY_ENQUEUED) internal::spawn_in_graph_arena(graph_reference(), *res);
