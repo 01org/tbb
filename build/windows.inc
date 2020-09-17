@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2019 Intel Corporation
+# Copyright (c) 2005-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,6 +78,13 @@ TBB.MANIFEST =
 ifneq ($(filter vc8 vc9,$(runtime)),)
     TBB.MANIFEST = tbbmanifest.exe.manifest
 endif
+
+TBBBIND.DEF = $(tbb_root)/src/tbb/$(def_prefix)-tbbbind-export.def
+TBBBIND.DLL = tbbbind$(DEBUG_SUFFIX).$(DLL)
+TBBBIND.LIB = tbbbind$(DEBUG_SUFFIX).$(LIBEXT)
+TBBBIND.RES = tbbbind.res
+LINK_TBBBIND.LIB = $(TBBBIND.LIB)
+HWLOC.LIB = libhwloc.$(LIBEXT)
 
 MALLOC.DEF = $(MALLOC_ROOT)/$(def_prefix)-tbbmalloc-export.def
 MALLOC.DLL = tbbmalloc$(DEBUG_SUFFIX).$(DLL)

@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2019 Intel Corporation
+    Copyright (c) 2005-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -310,7 +310,7 @@ int main() {
     // No any work + just resumable tasks feature (true)
     ScalabilityBenchmark<true>(0);
 
-    // Native implmentation
+    // Native implementation
     // Big work size
     BenchNativeImpl(100000);
     // Small work size

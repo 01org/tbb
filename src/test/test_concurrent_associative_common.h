@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2019 Intel Corporation
+    Copyright (c) 2019-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -245,10 +245,10 @@ void MultiMapEraseTests(){
     typename MultiMap::iterator erased_it;
     for (int i = 0; i < 10; ++i) {
         if ( i != 1 ) {
-            cont1.emplace(1, i);
-            cont2.emplace(1, i);
+            cont1.insert(std::make_pair(1, i));
+            cont2.insert(std::make_pair(1, i));
         } else {
-            erased_it = cont1.emplace(1, i).first;
+            erased_it = cont1.insert(std::make_pair(1, i)).first;
         }
     }
 
@@ -257,7 +257,7 @@ void MultiMapEraseTests(){
     ASSERT(cont1.size() == cont2.size(), "Incorrect count of elements was erased");
     typename MultiMap::iterator it1 = cont1.begin();
     typename MultiMap::iterator it2 = cont2.begin();
-    
+
     for (typename MultiMap::size_type i = 0; i < cont2.size(); ++i) {
         ASSERT(*(it1++) == *(it2++), "Multimap repetitive key was not erased properly");
     }

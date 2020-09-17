@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2019 Intel Corporation
+    Copyright (c) 2005-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -228,7 +228,7 @@ public:
 
 private:
     //! Used only by method move().
-    captured_exception() {}
+    captured_exception() : my_dynamic(), my_exception_name(), my_exception_info() {}
 
     //! Functionally equivalent to {captured_exception e(name,info); return e.move();}
     static captured_exception* allocate( const char* name, const char* info );

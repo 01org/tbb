@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2019 Intel Corporation
+    Copyright (c) 2005-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -62,10 +62,23 @@
 
 namespace tbb {
 
-class auto_partitioner;
-class simple_partitioner;
-class static_partitioner;
+class     auto_partitioner;
+class   simple_partitioner;
+class   static_partitioner;
 class affinity_partitioner;
+
+//! @cond INTERNAL
+namespace internal {
+    template <typename P, typename T> struct   is_deterministic_partitioner_t                                             ;
+    template <            typename T> struct   is_deterministic_partitioner_t<  simple_partitioner, T> { typedef T type; };
+    template <            typename T> struct   is_deterministic_partitioner_t<  static_partitioner, T> { typedef T type; };
+
+    template <typename P, typename T> struct is_isolated_action_partitioner_t                                             ;
+    template <            typename T> struct is_isolated_action_partitioner_t<    auto_partitioner, T> { typedef T type; };
+    template <            typename T> struct is_isolated_action_partitioner_t<  simple_partitioner, T> { typedef T type; };
+    template <            typename T> struct is_isolated_action_partitioner_t<  static_partitioner, T> { typedef T type; };
+} // namespace internal
+//! @endcond
 
 namespace interface9 {
     namespace internal {
@@ -277,7 +290,7 @@ struct adaptive_mode : partition_type_base<Partition> {
 
 //! A helper class to create a proportional_split object for a given type of Range.
 /** If the Range has static boolean constant 'is_splittable_in_proportion' set to 'true',
-    the created object splits a provided value in an implemenation-defined proportion;
+    the created object splits a provided value in an implementation-defined proportion;
     otherwise it represents equal-size split. */
 // TODO: check if this helper can be a nested class of proportional_mode.
 template <typename Range, typename = void>

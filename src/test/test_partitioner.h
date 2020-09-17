@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2019 Intel Corporation
+    Copyright (c) 2005-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -447,20 +447,20 @@ private:
     }
 };
 
-class SimpleBody {
+class DummyBody {
 public:
-    SimpleBody() { }
+    DummyBody() { }
     template <typename Range>
     void operator()(Range&) const { }
 };
 
-class SimpleReduceBody {
+class DummyReduceBody {
 public:
-    SimpleReduceBody() { }
-    SimpleReduceBody(SimpleReduceBody&, tbb::split) { }
+    DummyReduceBody() { }
+    DummyReduceBody(DummyReduceBody&, tbb::split) { }
     template <typename Range>
     void operator()(Range&) { }
-    void join(SimpleReduceBody&) { }
+    void join(DummyReduceBody&) { }
 };
 
 namespace interaction_with_range_and_partitioner {

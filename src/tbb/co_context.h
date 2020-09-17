@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2019 Intel Corporation
+    Copyright (c) 2005-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ inline void create_coroutine(coroutine_type& c, size_t stack_size, void* arg) {
     uintptr_t stack_ptr = (uintptr_t)mmap(NULL, protected_stack_size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
     __TBB_ASSERT((void*)stack_ptr != MAP_FAILED, NULL);
 
-    // Alow read write on our stack (guarded pages are still protected)
+    // Allow read write on our stack (guarded pages are still protected)
     int err = mprotect((void*)(stack_ptr + REG_PAGE_SIZE), page_aligned_stack_size, PROT_READ | PROT_WRITE);
     __TBB_ASSERT_EX(!err, NULL);
 

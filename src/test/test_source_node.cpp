@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005-2019 Intel Corporation
+    Copyright (c) 2005-2020 Intel Corporation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -413,13 +413,13 @@ void test_deduction_guides() {
     auto non_const_lambda = [](int& i) mutable { return i > 5; };
 
     // Tests for source_node(graph&, Body)
-    source_node s1(g, lambda);
+    source_node s1(g, lambda, /*is_active=*/false);
     static_assert(std::is_same_v<decltype(s1), source_node<int>>);
 
-    source_node s2(g, non_const_lambda);
+    source_node s2(g, non_const_lambda, /*is_active=*/false);
     static_assert(std::is_same_v<decltype(s2), source_node<int>>);
 
-    source_node s3(g, source_body_f);
+    source_node s3(g, source_body_f, /*is_active=*/false);
     static_assert(std::is_same_v<decltype(s3), source_node<int>>);
 
     source_node s4(s3);
@@ -429,13 +429,13 @@ void test_deduction_guides() {
     broadcast_node<int> bc(g);
 
     // Tests for source_node(const node_set<Args...>&, Body)
-    source_node s5(precedes(bc), lambda);
+    source_node s5(precedes(bc), lambda, /*is_active=*/false);
     static_assert(std::is_same_v<decltype(s5), source_node<int>>);
 
-    source_node s6(precedes(bc), non_const_lambda);
+    source_node s6(precedes(bc), non_const_lambda, /*is_active=*/false);
     static_assert(std::is_same_v<decltype(s6), source_node<int>>);
 
-    source_node s7(precedes(bc), source_body_f);
+    source_node s7(precedes(bc), source_body_f, /*is_active=*/false);
     static_assert(std::is_same_v<decltype(s7), source_node<int>>);
 #endif
     g.wait_for_all();
@@ -450,11 +450,11 @@ void test_follows_and_precedes_api() {
 
     graph g;
 
-    std::array<buffer_node<bool>, 3> successors {
+    std::array<buffer_node<bool>, 3> successors {{
         buffer_node<bool>(g),
-        buffer_node<bool>(g),
-        buffer_node<bool>(g)
-    };
+	    buffer_node<bool>(g),
+	    buffer_node<bool>(g)
+    }};
 
     bool do_try_put = true;
     source_node<bool> src(precedes(successors[0], successors[1], successors[2]), [&](bool& v) -> bool {

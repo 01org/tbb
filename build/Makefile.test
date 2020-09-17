@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2019 Intel Corporation
+# Copyright (c) 2005-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -251,6 +251,8 @@ test_tbb_cilk:
 endif
 
 test_opencl_node.$(TEST_EXT): LIBS += $(OPENCL.LIB)
+
+test_arena_constraints_hwloc.$(TEST_EXT): LIBS += $(HWLOC.LIB)
 
 $(TEST_TBB_PLAIN.EXE) $(TEST_TBB_SPECIAL.EXE): WARNING_KEY += $(TEST_WARNING_KEY)
 
