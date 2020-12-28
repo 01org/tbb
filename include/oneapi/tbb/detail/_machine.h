@@ -63,10 +63,6 @@ using std::this_thread::yield;
 // atomic_fence implementation
 //--------------------------------------------------------------------------------------------------
 
-#if (_WIN32 || _WIN64)
-#pragma intrinsic(_mm_mfence)
-#endif
-
 static inline void atomic_fence(std::memory_order order) {
 #if defined(__GNUC__) && (__TBB_x86_64 || __TBB_x86_32)
     if (order == std::memory_order_seq_cst)
@@ -79,16 +75,6 @@ static inline void atomic_fence(std::memory_order order) {
         __asm__ __volatile__ ("" ::: "memory");
     }
 #else
-#if (_WIN32 || _WIN64)
-    if (order == std::memory_order_seq_cst ||
-        order == std::memory_order_acq_rel ||
-        order == std::memory_order_acquire ||
-        order == std::memory_order_release )
-    {
-        _mm_mfence();
-        return;
-    }
-#endif /*(_WIN32 || _WIN64)*/
     std::atomic_thread_fence(order);
 #endif
 }
