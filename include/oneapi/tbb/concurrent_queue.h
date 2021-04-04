@@ -114,6 +114,11 @@ public:
         r1::cache_aligned_deallocate(my_queue_representation);
     }
 
+    concurrent_queue& operator= (concurrent_queue src) {
+        internal_swap(src);
+        return *this;
+    }
+
     // Enqueue an item at tail of queue.
     void push(const T& value) {
         internal_push(value);
@@ -355,6 +360,11 @@ public:
         queue_allocator_traits::destroy(my_allocator, my_queue_representation);
         r1::deallocate_bounded_queue_rep(reinterpret_cast<std::uint8_t*>(my_queue_representation),
                                          sizeof(queue_representation_type));
+    }
+
+    concurrent_bounded_queue& operator= (concurrent_bounded_queue src) {
+        internal_swap(src);
+        return *this;
     }
 
     // Enqueue an item at tail of queue.
