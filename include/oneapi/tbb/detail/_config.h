@@ -252,7 +252,7 @@
 #define __TBB_CPP17_IS_SWAPPABLE_PRESENT                (__TBB_LANG >= 201703L)
 #define __TBB_CPP20_COMPARISONS_PRESENT                 __TBB_CPP20_PRESENT
 
-#define __TBB_RESUMABLE_TASKS                           (!__TBB_WIN8UI_SUPPORT && !__ANDROID__)
+#define __TBB_RESUMABLE_TASKS                           (!__TBB_WIN8UI_SUPPORT && !__ANDROID__ && !__HAIKU__)
 
 /* This macro marks incomplete code or comments describing ideas which are considered for the future.
  * See also for plain comment with TODO and FIXME marks for small improvement opportunities.
@@ -439,6 +439,11 @@
 
 // Some STL containers not support allocator traits in old GCC versions
 #if __GXX_EXPERIMENTAL_CXX0X__ && __TBB_GLIBCXX_VERSION <= 50301
+    #define TBB_ALLOCATOR_TRAITS_BROKEN 1
+#endif
+
+// HAIKU build fix
+#if defined(__HAIKU__)
     #define TBB_ALLOCATOR_TRAITS_BROKEN 1
 #endif
 
