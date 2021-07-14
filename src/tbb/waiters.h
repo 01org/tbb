@@ -50,14 +50,42 @@ protected:
 };
 
 class outermost_worker_waiter : public waiter_base {
+    friend class arena;
 public:
     using waiter_base::waiter_base;
 
-    bool continue_execution(arena_slot& slot, d1::task*& t) const {
+    bool continue_execution(arena_slot& slot, d1::task*& t) {
         __TBB_ASSERT(t == nullptr, nullptr);
 
         if (is_worker_should_leave(slot)) {
-            // Leave dispatch loop
+            market* m = my_arena.my_market;
+
+            int current_epoch{};
+            int prev_epoch{};
+
+            for (auto t1 = std::chrono::steady_clock::now(), t2 = t1;
+                std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1) < std::chrono::microseconds(40);
+                t2 = std::chrono::steady_clock::now())
+            {
+                current_epoch = m->my_adjust_demand_current_epoch.load(std::memory_order_relaxed);
+                if (prev_epoch != current_epoch) {
+                    if (my_arena.my_pool_state.load(std::memory_order_relaxed) != arena::SNAPSHOT_EMPTY &&
+                        !my_arena.is_recall_requested())
+                    {
+                        return true;
+                    }
+
+                    arena* a = m->arena_in_need(&my_arena, &my_arena);
+                    if (a) {
+                        my_next_arena = a;
+                        break;
+                    }
+                }
+
+                prev_epoch = current_epoch;
+                d0::yield();
+            }
+
             return false;
         }
 
@@ -103,6 +131,8 @@ private:
 
         return false;
     }
+
+    arena* my_next_arena = nullptr;
 };
 
 class sleep_waiter : public waiter_base {
