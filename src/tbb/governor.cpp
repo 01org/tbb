@@ -78,7 +78,9 @@ void governor::release_resources () {
     if( status )
         runtime_warning("failed to destroy task scheduler TLS: %s", std::strerror(status));
     clear_address_waiter_table();
-
+#if __TBB_STATISTICS
+    governor::accumulator.print_statistics();
+#endif
     dynamic_unlink_all();
 }
 
