@@ -49,6 +49,8 @@ int main() {}
 // FIXME: fix the test to support Windows* 8 Store Apps mode.
 #if !__TBB_WIN8UI_SUPPORT
 
+#if __TBB_DYNAMIC_LOAD_ENABLED
+
 #define __TBB_NO_IMPLICIT_LINKAGE 1
 #include "common/test.h"
 #include "common/utils.h"
@@ -143,6 +145,6 @@ TEST_CASE("use test as lib") {
         }
     }
 }
-
-#endif /* __TBB_WIN8UI_SUPPORT */
+#endif // __TBB_DYNAMIC_LOAD_ENABLED
+#endif // __TBB_WIN8UI_SUPPORT
 #endif // _USRDLL

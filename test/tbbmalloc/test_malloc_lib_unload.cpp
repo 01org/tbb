@@ -112,9 +112,9 @@ int main() {}
 
 // harness_defs.h must be included before tbb_stddef.h to overcome exception-dependent
 // system headers that come from tbb_stddef.h
-#if __TBB_WIN8UI_SUPPORT || __TBB_MIC_OFFLOAD
+#if __TBB_WIN8UI_SUPPORT || __TBB_MIC_OFFLOAD || __TBB_SOURCE_DIRECTLY_INCLUDED
 // The test does not work if dynamic load is unavailable.
-// For MIC offload, it fails because liboffload brings libiomp which observes and uses the fake scalable_* calls.
+// For MIC offload, it fails because liboffload brings libiomp which observes and uses the fake scalable_* calls
 #else /* !(__TBB_WIN8UI_SUPPORT || __TBB_MIC_OFFLOAD) */
 #include "common/test.h"
 #include "common/memory_usage.h"
@@ -202,6 +202,6 @@ TEST_CASE("test unload lib") {
     }
 }
 
-#endif /* !(__TBB_WIN8UI_SUPPORT || __TBB_MIC_OFFLOAD) */
+#endif /* !(__TBB_WIN8UI_SUPPORT || __TBB_MIC_OFFLOAD || __TBB_SOURCE_DIRECTLY_INCLUDED) */
 
 #endif // _USRDLL
