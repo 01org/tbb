@@ -98,6 +98,7 @@ add_dependencies(memcheck-short
     memcheck-test_handle_perror
     memcheck-test_hw_concurrency
     memcheck-test_eh_thread
+    memcheck-test_statistics
     memcheck-test_global_control
     memcheck-test_task
     memcheck-test_concurrent_monitor
