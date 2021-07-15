@@ -25,6 +25,7 @@
 #include "detail/_exception.h"
 #include "detail/_task.h"
 #include "detail/_small_object_pool.h"
+#include "detail/_intrusive_list.h"
 
 #if __TBB_PREVIEW_TASK_GROUP_EXTENSIONS
 #include "detail/_task_handle.h"
@@ -59,6 +60,7 @@ class task_dispatcher;
 template <bool>
 class context_guard_helper;
 struct task_arena_impl;
+class context_list;
 
 void __TBB_EXPORTED_FUNC execute(d1::task_arena_base&, d1::delegate_base&);
 void __TBB_EXPORTED_FUNC isolate_within_arena(d1::delegate_base&, std::intptr_t);
@@ -139,18 +141,6 @@ namespace {
 
 namespace d1 {
 
-struct context_list_node {
-    std::atomic<context_list_node*> prev{};
-    std::atomic<context_list_node*> next{};
-
-    void remove_relaxed() {
-        context_list_node* p = prev.load(std::memory_order_relaxed);
-        context_list_node* n = next.load(std::memory_order_relaxed);
-        p->next.store(n, std::memory_order_relaxed);
-        n->prev.store(p, std::memory_order_relaxed);
-    }
-};
-
 //! Used to form groups of tasks
 /** @ingroup task_scheduling
     The context services explicit cancellation requests from user code, and unhandled
@@ -218,8 +208,7 @@ private:
         locked,
         isolated,
         bound,
-        detached,
-        dying
+        dead
     };
 
     //! The synchronization machine state to manage lifetime.
@@ -234,12 +223,13 @@ private:
     };
 
     //! Thread data instance that registered this context in its list.
-    std::atomic<r1::thread_data*> my_owner;
+    r1::context_list* my_context_list;
+    static_assert(sizeof(std::atomic<r1::thread_data*>) == sizeof(r1::context_list*), "To preserve backward compatibility these types should have the same size");
 
     //! Used to form the thread specific list of contexts without additional memory allocation.
     /** A context is included into the list of the current thread when its binding to
         its parent happens. Any context can be present in the list of one thread only. **/
-    context_list_node my_node;
+    r1::intrusive_list_node my_node;
 
     //! Pointer to the container storing exception being propagated across this task group.
     r1::tbb_exception_ptr* my_exception;
@@ -251,18 +241,18 @@ private:
     string_resource_index my_name;
 
     char padding[max_nfs_size
-        - sizeof(std::uint64_t)                     // my_cpu_ctl_env
-        - sizeof(std::atomic<std::uint32_t>)        // my_cancellation_requested
-        - sizeof(std::uint8_t)                      // my_version
-        - sizeof(context_traits)                    // my_traits
-        - sizeof(std::atomic<std::uint8_t>)         // my_state
-        - sizeof(std::atomic<lifetime_state>)       // my_lifetime_state
-        - sizeof(task_group_context*)               // my_parent
-        - sizeof(std::atomic<r1::thread_data*>)     // my_owner
-        - sizeof(context_list_node)                 // my_node
-        - sizeof(r1::tbb_exception_ptr*)            // my_exception
-        - sizeof(void*)                             // my_itt_caller
-        - sizeof(string_resource_index)             // my_name
+        - sizeof(std::uint64_t)                 // my_cpu_ctl_env
+        - sizeof(std::atomic<std::uint32_t>)    // my_cancellation_requested
+        - sizeof(std::uint8_t)                  // my_version
+        - sizeof(context_traits)                // my_traits
+        - sizeof(std::atomic<std::uint8_t>)     // my_state
+        - sizeof(std::atomic<lifetime_state>)   // my_lifetime_state
+        - sizeof(task_group_context*)           // my_parent
+        - sizeof(r1::context_list*)             // my_context_list
+        - sizeof(r1::intrusive_list_node)       // my_node
+        - sizeof(r1::tbb_exception_ptr*)        // my_exception
+        - sizeof(void*)                         // my_itt_caller
+        - sizeof(string_resource_index)         // my_name
     ];
 
     task_group_context(context_traits t, string_resource_index name)
